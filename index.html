@@ -58,6 +58,14 @@
   body[data-lang="he"] .bio{font-family:'Heebo', sans-serif;font-weight:400;}
   .meta{display:flex;flex-wrap:wrap;gap:2rem;font-size:0.85rem;color:var(--fg-muted);opacity:0;animation:rise 1s ease forwards;animation-delay:.7s;}
   .meta div span{display:block;color:var(--fg-faint);font-size:0.75rem;margin-bottom:0.3rem;}
+  .hero-cta{
+    display:inline-block;margin-top:1.75rem;align-self:flex-start;
+    font-size:0.85rem;color:var(--fg);border:1px solid var(--accent);
+    padding:0.65rem 1.6rem;border-radius:24px;
+    opacity:0;animation:rise 1s ease forwards;animation-delay:.85s;
+    transition:background .2s ease, color .2s ease;
+  }
+  .hero-cta:hover{background:var(--accent);color:var(--bg);}
   @keyframes rise{from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);}}
   @media (max-width:900px){ .hero{grid-template-columns:1fr;padding-top:8rem;} .hero-photo{max-width:200px;max-height:38vh;margin-bottom:2rem;} }
 
@@ -82,7 +90,16 @@
   .frame:hover .cap{opacity:1;transform:translateY(0);}
 
   @media (max-width:900px){ .grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:560px){ .grid{grid-template-columns:1fr;} .frame.wide{grid-column:span 1;aspect-ratio:4/5;} }
+  @media (max-width:420px){ .frame.wide{aspect-ratio:1/1;} }
+
+  .frame.extra{display:none;}
+  .grid.expanded .frame.extra{display:block;}
+  .view-more{
+    display:block;margin:2rem auto 0;background:none;border:1px solid var(--line);
+    color:var(--fg-muted);font-size:0.85rem;padding:0.6rem 1.5rem;border-radius:24px;
+    cursor:pointer;transition:color .2s ease, border-color .2s ease;font-family:'Inter',sans-serif;
+  }
+  .view-more:hover{color:var(--fg);border-color:var(--accent);}
 
   .contact{padding:clamp(4rem,12vh,8rem) 0 clamp(3rem,6vh,4rem);border-top:1px solid var(--line);}
   .contact h2{font-size:clamp(2.2rem,6vw,4rem);font-weight:400;margin:0 0 2rem 0;max-width:16ch;}
@@ -155,6 +172,7 @@
       <div><span data-en="Shoots" data-he="מצלם">Shoots</span><span data-en="Portrait, street, travel" data-he="פורטרט, רחוב, טיולים">Portrait, street, travel</span></div>
       <div><span data-en="Format" data-he="פורמט">Format</span><span data-en="Digital" data-he="דיגיטלי">Digital</span></div>
     </div>
+    <a href="#contact" class="hero-cta" data-en="Say hello" data-he="בואו נדבר">Say hello</a>
   </div>
 </section>
 
@@ -278,6 +296,38 @@
 
 <script>
 (function(){
+  // Collapse long galleries behind a "view all" toggle
+  var INITIAL_COUNT = 6;
+  document.querySelectorAll('.grid').forEach(function(grid){
+    var tiles = Array.prototype.slice.call(grid.querySelectorAll('.frame'));
+    if(tiles.length <= 8) return;
+    tiles.slice(INITIAL_COUNT).forEach(function(t){ t.classList.add('extra'); });
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'view-more';
+    var totalLabelEn = 'View all ' + tiles.length + ' photos';
+    var totalLabelHe = 'הצג את כל ' + tiles.length + ' התמונות';
+    var lessLabelEn = 'Show fewer';
+    var lessLabelHe = 'הצג פחות';
+    btn.setAttribute('data-en', totalLabelEn);
+    btn.setAttribute('data-he', totalLabelHe);
+    btn.textContent = totalLabelEn;
+    btn.addEventListener('click', function(){
+      var expanded = grid.classList.toggle('expanded');
+      if(expanded){
+        btn.setAttribute('data-en', lessLabelEn);
+        btn.setAttribute('data-he', lessLabelHe);
+      } else {
+        btn.setAttribute('data-en', totalLabelEn);
+        btn.setAttribute('data-he', totalLabelHe);
+        grid.scrollIntoView({block:'start', behavior:'smooth'});
+      }
+      var lang = document.documentElement.lang === 'he' ? 'he' : 'en';
+      btn.textContent = lang === 'he' ? btn.getAttribute('data-he') : btn.getAttribute('data-en');
+    });
+    grid.insertAdjacentElement('afterend', btn);
+  });
+
   function setLang(lang){
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
